@@ -72,11 +72,14 @@
       statusText.textContent = "あと2人選んでね〜";
       submitBtn.disabled = true;
     } else if (selected.length === 1) {
-      statusText.textContent = `選択中：${selected[0].name} × （あと1人）`;
+      const first = selected.at(0);
+      statusText.textContent = `選択中：${first.name} × （あと1人）`;
       submitBtn.disabled = true;
     } else {
       const sorted = [...selected].sort((a, b) => a.id - b.id);
-      statusText.textContent = `選択中：${sorted[0].name} × ${sorted[1].name}`;
+      const first = sorted.at(0);
+      const second = sorted.at(1);
+      statusText.textContent = `選択中：${first.name} × ${second.name}`;
       submitBtn.disabled = false;
     }
   }
@@ -85,7 +88,9 @@
     submitBtn.disabled = true;
     submitBtn.textContent = "送信中...";
     const sorted = [...selected].sort((a, b) => a.id - b.id);
-    const pairName = `${sorted[0].name} × ${sorted[1].name}`;
+    const first = sorted.at(0);
+    const second = sorted.at(1);
+    const pairName = `${first.name} × ${second.name}`;
 
     const formData = new URLSearchParams();
     formData.append(ENTRY_ID, pairName);
