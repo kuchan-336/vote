@@ -29,7 +29,8 @@
   <button id="submitBtn" disabled onclick="submitVote()">このペアに投票する？</button>
 
 <script>
-  const GAS_URL = "https://google.com";
+  const FORM_URL = "https://google.com";
+  const ENTRY_ID = "entry.31012823";
 
   const characters = [
     { id: 1, name: "クリス", img: "Kris.jpg" },
@@ -85,22 +86,23 @@
     submitBtn.textContent = "送信中...";
     const sorted = [...selected].sort((a, b) => a.id - b.id);
     const pairName = `${sorted[0].name} × ${sorted[1].name}`;
-    const url = `${GAS_URL}?pair=${encodeURIComponent(pairName)}&char1=${encodeURIComponent(sorted[0].name)}&char2=${encodeURIComponent(sorted[1].name)}&t=${Date.now()}`;
 
-    const img = new Image();
-    img.src = url;
+    const formData = new URLSearchParams();
+    formData.append(ENTRY_ID, pairName);
 
-    setTimeout(() => {
-      statusText.textContent = `「${pairName}」に投票しました！ありがとう！`;
-      submitBtn.textContent = "投票完了！";
-      setTimeout(() => {
-        selected = [];
-        document.querySelectorAll(".card").forEach(c => c.classList.remove("selected"));
-        statusText.textContent = "あと2人選んでね〜";
-        submitBtn.textContent = "このペアに投票する？";
-        submitBtn.disabled = true;
-      }, 2000);
-    }, 800);
+    fetch(FORM_URL, {
+      method: "POST",
+      mode: "no-cors",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: formData.toString()
+    }).then(() => {
+      alert(`「${pairName}」に投票しました！ありがとうございます！`);
+      location.reload();
+    }).catch(() => {
+      alert("エラーが発生しました。もう一度お試しください。");
+      submitBtn.disabled = false;
+      submitBtn.textContent = "このペアに投票する？";
+    });
   }
 </script>
 </body>
