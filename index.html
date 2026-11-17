@@ -28,10 +28,12 @@
   <div class="status" id="statusText">あと2人選んでね〜</div>
   <button id="submitBtn" disabled onclick="submitVote()">このペアに投票する？</button>
 
-<script>
-  const FORM_URL = "https://google.com";
-  const ENTRY_ID = "entry.31012823";
+  <iframe name="hidden_iframe" style="display:none;"></iframe>
+  <form id="googleForm" action="https://google.com" method="POST" target="hidden_iframe" style="display:none;">
+    <input type="hidden" name="entry.31012823" id="formInput">
+  </form>
 
+<script>
   const characters = [
     { id: 1, name: "クリス", img: "Kris.jpg" },
     { id: 2, name: "くうり", img: "Kurichan.jpg" },
@@ -72,14 +74,11 @@
       statusText.textContent = "あと2人選んでね〜";
       submitBtn.disabled = true;
     } else if (selected.length === 1) {
-      const first = selected.at(0);
-      statusText.textContent = `選択中：${first.name} × （あと1人）`;
+      statusText.textContent = `選択中：${selected.at(0).name} × （あと1人）`;
       submitBtn.disabled = true;
     } else {
       const sorted = [...selected].sort((a, b) => a.id - b.id);
-      const first = sorted.at(0);
-      const second = sorted.at(1);
-      statusText.textContent = `選択中：${first.name} × ${second.name}`;
+      statusText.textContent = `選択中：${sorted.at(0).name} × ${sorted.at(1).name}`;
       submitBtn.disabled = false;
     }
   }
@@ -88,26 +87,22 @@
     submitBtn.disabled = true;
     submitBtn.textContent = "送信中...";
     const sorted = [...selected].sort((a, b) => a.id - b.id);
-    const first = sorted.at(0);
-    const second = sorted.at(1);
-    const pairName = `${first.name} × ${second.name}`;
+    const pairName = `${sorted.at(0).name} × ${sorted.at(1).name}`;
 
-    const formData = new URLSearchParams();
-    formData.append(ENTRY_ID, pairName);
+    document.getElementById("formInput").value = pairName;
+    document.getElementById("googleForm").submit();
 
-    fetch(FORM_URL, {
-      method: "POST",
-      mode: "no-cors",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: formData.toString()
-    }).then(() => {
-      alert(`「${pairName}」に投票しました！ありがとうございます！`);
-      location.reload();
-    }).catch(() => {
-      alert("エラーが発生しました。もう一度お試しください。");
-      submitBtn.disabled = false;
-      submitBtn.textContent = "このペアに投票する？";
-    });
+    setTimeout(() => {
+      statusText.textContent = `「${pairName}」に投票しました！ありがとう！`;
+      submitBtn.textContent = "投票完了！";
+      setTimeout(() => {
+        selected = [];
+        document.querySelectorAll(".card").forEach(c => c.classList.remove("selected"));
+        statusText.textContent = "あと2人選んでね〜";
+        submitBtn.textContent = "このペアに投票する？";
+        submitBtn.disabled = true;
+      }, 2000);
+    }, 800);
   }
 </script>
 </body>
