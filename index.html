@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>新ペア投票</title>
+<title>新ペア★投票</title>
 <style>
   body { font-family: sans-serif; text-align: center; background: #f8f9fa; padding: 20px; margin: 0; }
   h1 { font-size: 22px; color: #333; }
@@ -27,11 +27,6 @@
   <div class="grid" id="charGrid"></div>
   <div class="status" id="statusText">あと2人選んでね〜</div>
   <button id="submitBtn" disabled onclick="submitVote()">このペアに投票する？</button>
-
-  <iframe name="hidden_iframe" style="display:none;"></iframe>
-  <form id="googleForm" action="https://google.com" method="POST" target="hidden_iframe" style="display:none;">
-    <input type="hidden" name="entry.31012823" id="formInput">
-  </form>
 
 <script>
   const characters = [
@@ -89,10 +84,18 @@
     const sorted = [...selected].sort((a, b) => a.id - b.id);
     const pairName = `${sorted.at(0).name} × ${sorted.at(1).name}`;
 
-    document.getElementById("formInput").value = pairName;
-    document.getElementById("googleForm").submit();
+    const formUrl = "https://google.com";
+    const formData = new URLSearchParams();
+    formData.append("entry.31012823", pairName);
 
-    setTimeout(() => {
+    fetch(formUrl, {
+      method: "POST",
+      mode: "no-cors",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      body: formData.toString()
+    }).then(() => {
       statusText.textContent = `「${pairName}」に投票しました！ありがとう！`;
       submitBtn.textContent = "投票完了！";
       setTimeout(() => {
@@ -102,7 +105,11 @@
         submitBtn.textContent = "このペアに投票する？";
         submitBtn.disabled = true;
       }, 2000);
-    }, 800);
+    }).catch(() => {
+      statusText.textContent = "送信エラーが起きました。もう一度試してね！";
+      submitBtn.textContent = "このペアに投票する？";
+      submitBtn.disabled = false;
+    });
   }
 </script>
 </body>
