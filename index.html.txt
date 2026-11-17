@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>新ペア★投票</title>
+<style>
+  body { font-family: sans-serif; text-align: center; background: #f8f9fa; padding: 20px; margin: 0; }
+  h1 { font-size: 22px; color: #333; }
+  p { color: #666; font-size: 14px; }
+  .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; max-width: 500px; margin: 20px auto; }
+  @media (min-width: 600px) { .grid { grid-template-columns: repeat(3, 1fr); } }
+  .card { background: #fff; border: 3px solid #ddd; border-radius: 12px; padding: 10px; cursor: pointer; transition: 0.2s; }
+  .card.selected { border-color: #ff4757; background: #fff0f1; transform: scale(1.03); }
+  .card img { width: 100%; aspect-ratio: 1 / 1; object-fit: cover; border-radius: 8px; }
+  .card .name { margin-top: 8px; font-weight: bold; font-size: 15px; color: #333; }
+  .status { margin: 20px 0; font-size: 18px; font-weight: bold; color: #ff4757; min-height: 27px; }
+  button { background: #ff4757; color: white; border: none; padding: 14px 40px; font-size: 16px; font-weight: bold; border-radius: 30px; cursor: pointer; }
+  button:disabled { background: #ccc; cursor: not-allowed; }
+</style>
+</head>
+<body>
+
+  <h1>新ペア★投票</h1>
+  <p>好きなキャラクターを2人タップしてね！！</p>
+
+  <div class="grid" id="charGrid"></div>
+  <div class="status" id="statusText">あと2人選んでね〜</div>
+  <button id="submitBtn" disabled onclick="submitVote()">このペアに投票する？</button>
+
+<script>
+  const GAS_URL = "https://google.com";
+
+  const characters = [
+    { id: 1, name: "クリス", img: "Kris.jpg" },
+    { id: 2, name: "くうり", img: "Kurichan.jpg" },
+    { id: 3, name: "カナタ", img: "Kanata.jpg" },
+    { id: 4, name: "キョウ", img: "Kyoka.jpg" },
+    { id: 5, name: "ひかる", img: "Hikaru.jpg" },
+    { id: 6, name: "けい", img: "Kei.jpg" }
+  ];
+
+  let selected = [];
+  const grid = document.getElementById("charGrid");
+  const statusText = document.getElementById("statusText");
+  const submitBtn = document.getElementById("submitBtn");
+
+  characters.forEach(char => {
+    const card = document.createElement("div");
+    card.className = "card";
+    card.innerHTML = `<img src="${char.img}" alt="${char.name}"><div class="name">${char.name}</div>`;
+    card.onclick = () => toggleSelect(char, card);
+    grid.appendChild(card);
+  });
+
+  function toggleSelect(char, card) {
+    const index = selected.findIndex(c => c.id === char.id);
+    if (index > -1) {
+      selected.splice(index, 1);
+      card.classList.remove("selected");
+    } else {
+      if (selected.length >= 2) return;
+      selected.push(char);
+      card.classList.add("selected");
+    }
+    updateUI();
+  }
+
+  function updateUI() {
+    if (selected.length === 0) {
+      statusText.textContent = "あと2人選んでね〜";
+      submitBtn.disabled = true;
+    } else if (selected.length === 1) {
+      statusText.textContent = `選択中：${selected[0].name} × （あと1人）`;
+      submitBtn.disabled = true;
+    } else {
+      const sorted = [...selected].sort((a, b) => a.id - b.id);
+      statusText.textContent = `選択中：${sorted[0].name} × ${sorted[1].name}`;
+      submitBtn.disabled = false;
+    }
+  }
+
+  function submitVote() {
+    submitBtn.disabled = true;
+    submitBtn.textContent = "送信中...";
+    const sorted = [...selected].sort((a, b) => a.id - b.id);
+    const pairName = `${sorted[0].name} × ${sorted[1].name}`;
+
+    fetch(GAS_URL, {
+      method: "POST",
+      mode: "no-cors",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ pair: pairName, char1: sorted[0].name, char2: sorted[1].name })
+    }).then(() => {
+      alert(`「${pairName}」に投票しました！ありがとうございます！`);
+      location.reload();
+    }).catch(() => {
+      alert("エラーが発生しました。もう一度お試しください。");
+      submitBtn.disabled = false;
+      submitBtn.textContent = "このペアに投票する？";
+    });
+  }
+</script>
+</body>
+</html>
