@@ -80,33 +80,27 @@
     }
   }
 
-  async function submitVote() {
+  function submitVote() {
     submitBtn.disabled = true;
     submitBtn.textContent = "送信中...";
     const sorted = [...selected].sort((a, b) => a.id - b.id);
     const pairName = `${sorted[0].name} × ${sorted[1].name}`;
+    const url = `${GAS_URL}?pair=${encodeURIComponent(pairName)}&char1=${encodeURIComponent(sorted[0].name)}&char2=${encodeURIComponent(sorted[1].name)}&t=${Date.now()}`;
 
-    try {
-      await fetch(GAS_URL, {
-        method: "POST",
-        mode: "no-cors",
-        headers: { "Content-Type": "text/plain" },
-        body: JSON.stringify({ pair: pairName, char1: sorted[0].name, char2: sorted[1].name })
-      });
-      statusText.textContent = `「${pairName}」に投票したよ〜ありがと〜☆`;
-      submitBtn.textContent = "投票完了だってさ。";
+    const img = new Image();
+    img.src = url;
+
+    setTimeout(() => {
+      statusText.textContent = `「${pairName}」に投票しました！ありがとう！`;
+      submitBtn.textContent = "投票完了！";
       setTimeout(() => {
         selected = [];
         document.querySelectorAll(".card").forEach(c => c.classList.remove("selected"));
         statusText.textContent = "あと2人選んでね〜";
         submitBtn.textContent = "このペアに投票する？";
         submitBtn.disabled = true;
-      }, 2500);
-    } catch (e) {
-      alert("エラーが発生したってよ。もう一度試してね〜");
-      submitBtn.disabled = false;
-      submitBtn.textContent = "このペアに投票する？";
-    }
+      }, 2000);
+    }, 800);
   }
 </script>
 </body>
